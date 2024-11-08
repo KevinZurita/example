@@ -1,0 +1,317 @@
+Advanced CI/CD Notes
+---
+
+## **1. Use Templates for Reusability**
+
+### **a. Template Types**
+
+- **Stage Templates**: Reuse entire stages.
+- **Job Templates**: Reuse jobs within stages.
+- **Step Templates**: Reuse steps within jobs.
+
+### **b. Creating and Using Templates**
+
+**Define a Template File (e.g., `build-template.yml`):**
+
+```yaml
+# build-template.yml
+parameters:
+  - name: buildConfiguration
+    default: 'Release'
+
+steps:
+  - script: |
+      echo "Building in ${{ parameters.buildConfiguration }} mode."
+      dotnet build --configuration ${{ parameters.buildConfiguration }}
+```
+
+**Reference the Template in Your Pipeline:**
+
+```yaml
+# azure-pipelines.yml
+stages:
+  - stage: Build
+    jobs:
+      - job: BuildJob
+        steps:
+          - template: build-template.yml
+            parameters:
+              buildConfiguration: 'Debug'
+```
+
+## **2. Implement Runtime Parameters**
+
+Allow flexibility by specifying parameters at queue time.
+
+```yaml
+# azure-pipelines.yml
+parameters:
+  - name: deploymentEnvironment
+    type: string
+    default: 'dev'
+    values:
+      - dev
+      - staging
+      - production
+
+stages:
+  - stage: Deploy
+    jobs:
+      - job: DeployJob
+        steps:
+          - script: echo "Deploying to ${{ parameters.deploymentEnvironment }} environment."
+```
+
+## **3. Leverage Conditional Logic**
+
+Control the execution flow with conditions.
+
+```yaml
+steps:
+  - script: echo "This runs on all branches."
+  - script: echo "This runs only on the main branch."
+    condition: eq(variables['Build.SourceBranchName'], 'main')
+```
+
+## **4. Utilize Variable Groups and Key Vault**
+
+### **a. Variable Groups**
+
+- Store and manage variables in a group.
+- Share variables across multiple pipelines.
+
+**Link a Variable Group:**
+
+```yaml
+variables:
+- group: 'MyVariableGroup'
+```
+
+### **b. Azure Key Vault Integration**
+
+- Securely manage secrets.
+- Automatically fetch secrets from Key Vault.
+
+**Link Key Vault Secrets:**
+
+```yaml
+variables:
+- group: 'MyKeyVaultSecrets'
+```
+
+## **5. Set Up Matrix Builds**
+
+Run jobs in parallel with different configurations.
+
+```yaml
+jobs:
+  - job: Build
+    strategy:
+      matrix:
+        linux:
+          OS: 'ubuntu-latest'
+        windows:
+          OS: 'windows-latest'
+    pool:
+      vmImage: ${{ matrix.OS }}
+    steps:
+      - script: echo "Building on ${{ matrix.OS }}"
+```
+
+## **6. Advanced Deployment Strategies**
+
+### **a. Rolling Deployments**
+
+Deploy to a subset of targets at a time.
+
+```yaml
+jobs:
+  - deployment: RollingDeploy
+    environment: 'Production'
+    strategy:
+      rolling:
+        maxParallel: 2
+        deploy:
+          steps:
+            - script: echo "Deploying to $(environmentName)"
+```
+
+### **b. Canary Releases**
+
+Gradually expose changes to a small subset of users.
+
+- Implement feature flags.
+- Route a percentage of traffic to the new version.
+
+## **7. Design Multi-Stage Pipelines**
+
+Organize your pipeline into stages for build, test, and deploy.
+
+```yaml
+stages:
+- stage: Build
+  ...
+
+- stage: Test
+  dependsOn: Build
+  ...
+
+- stage: Deploy
+  dependsOn: Test
+  ...
+```
+
+## **8. Integrate with External Scripts and Tools**
+
+Run custom scripts or use third-party tools.
+
+```yaml
+steps:
+  - script: |
+      # Install dependencies
+      npm install
+      # Run custom script
+      node ./scripts/custom-script.js
+    displayName: 'Run Custom Script'
+```
+
+## **9. Optimize with Trigger and Path Filters**
+
+### **a. Continuous Integration Triggers**
+
+Specify which branches to build.
+
+```yaml
+trigger:
+  branches:
+    include:
+      - main
+      - release/*
+```
+
+### **b. Path Filters**
+
+Build only when certain files change.
+
+```yaml
+trigger:
+  paths:
+    include:
+      - src/**
+    exclude:
+      - docs/**
+```
+
+## **10. Create Task Groups**
+
+Group a sequence of tasks into a single reusable task.
+
+- **Note**: Task groups are created via the Azure DevOps web interface but can be referenced in YAML.
+
+```yaml
+steps:
+  - task: MyTaskGroup@1
+    inputs:
+      exampleInput: 'value'
+```
+
+## **11. Implement Inline Scripts with Error Handling**
+
+Run scripts with built-in error handling and retries.
+
+```yaml
+- script: |
+    set -e
+    ./deploy.sh
+  displayName: 'Deploy Script'
+  continueOnError: false
+  retryCountOnTaskFailure: 2
+```
+
+## **12. Manage Pipeline Artifacts**
+
+Share data between jobs and stages.
+
+### **a. Publish Artifacts**
+
+```yaml
+steps:
+  - publish: $(Build.ArtifactStagingDirectory)
+    artifact: 'drop'
+```
+
+### **b. Download Artifacts**
+
+```yaml
+steps:
+  - download: current
+    artifact: 'drop'
+```
+
+## **13. Use Advanced Expressions**
+
+Create complex conditions and variable expressions.
+
+```yaml
+variables:
+  shouldRunTests: $[eq(variables['Build.SourceBranchName'], 'main')]
+
+steps:
+  - script: echo "Running tests..."
+    condition: eq(variables.shouldRunTests, true)
+```
+
+## **14. Implement Pipeline Caching**
+
+Cache dependencies to speed up builds.
+
+```yaml
+steps:
+  - task: [email protected]
+    inputs:
+      key: 'npm | "$(Agent.OS)" | package-lock.json'
+      restoreKeys: |
+        npm | "$(Agent.OS)"
+        npm
+      path: ~/.npm
+```
+
+## **15. Secure Files with Secure Files Library**
+
+Use secure files for certificates or provisioning profiles.
+
+```yaml
+steps:
+  - task: [email protected]
+    inputs:
+      secureFile: 'myCertificate.p12'
+  - script: |
+      echo "Using secure file"
+```
+
+---
+
+## **Additional Resources**
+
+- **Azure Pipelines YAML Schema**: [Microsoft Docs](https://docs.microsoft.com/azure/devops/pipelines/yaml-schema)
+- **Templates**: [Using Templates in Azure Pipelines](https://docs.microsoft.com/azure/devops/pipelines/process/templates)
+- **Pipeline Variables**: [Define Variables](https://docs.microsoft.com/azure/devops/pipelines/process/variables)
+- **Deployment Strategies**: [Choose a Deployment Strategy](https://docs.microsoft.com/azure/devops/pipelines/release/strategies)
+
+## **Best Practices**
+
+- **Modularize Pipelines**: Break down complex pipelines into templates.
+- **Version Control Pipelines**: Store YAML files alongside code for traceability.
+- **Use Descriptive Names**: Name stages, jobs, and steps clearly.
+- **Test Changes**: Validate pipeline changes in a non-production branch.
+- **Keep Secrets Secure**: Use Variable Groups and Key Vault.
+
+## **Next Steps**
+
+- **Explore Extensions**: Enhance functionality with Marketplace tasks.
+- **Automate Infrastructure**: Integrate with Azure Resource Manager or Terraform.
+- **Monitor and Analyze**: Use pipeline analytics for insights.
+
+---
+
+By incorporating these advanced features and best practices, you'll be able to design robust, efficient, and maintainable Azure Pipelines that suit complex project requirements. Happy coding!
