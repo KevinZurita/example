@@ -113,75 +113,225 @@ In summary, automated testing is a critical investment that ensures software qua
 
 ## Pester Testing Standards
 ### Pester Test Workflow and Syntax  
-**Description:** Provide a concise description of the standards purpose & objective.  
-**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
-**Implementation:** Offer guidance on how to implement the standard effectively.  
-**Compliance:** Explain how compliance with the standard will be measured or assessed.  
-**Environment Considerations:** If the standard is different by environment, include those details.  
+**Description:** Defines the workflow, syntax, and best practices for writing and organizing Pester tests in PowerShell projects. Covers file placement, naming conventions, test discovery, execution, test file structure, setup/teardown, mocking, and the use of tags for test selection.
+**Guidelines:**
+- **File Placement & Naming:** Place all test files in a dedicated `Tests` directory or alongside the scripts/modules they test. Name test files with the `.Tests.ps1` suffix (e.g., `MyScript.Tests.ps1`).
+- **Discovery & Run:** Pester automatically discovers test files ending with `.Tests.ps1`. Use a consistent structure for test files to enable easy discovery and execution in CI/CD.
 
-| Column 1 | Column 2 | Column 3 | Column 4 |
-| -------- | -------- | -------- | -------- |
+- **Test File Structure:** Use `BeforeAll` and `AfterAll` blocks for setup and teardown. Organize tests using `Describe`, `Context`, and `It` blocks for clarity and maintainability.
+- **Mocking:** Use `Mock` to simulate dependencies and isolate units of code. Only mock external dependencies or side effects, not the code under test.
+- **Tags:** Use tags (e.g., `Unit`, `EndToEnd`, `Integration`, `Quality`) to categorize tests. Tags enable selective test execution in pipelines (see `azure-pipelines.yml` and `pester-tests.yml`).
+**Test Types:**
+- **Unit Tests:** Test individual functions or logic, using mocks as needed. Should cover all expected results (throws, outputs, returns).
+- **EndToEnd Tests:** Validate full script execution, including resource creation and teardown. Use tags like `EndToEnd` for these.
 
-### Authentication  
-**Description:** Provide a concise description of the standards purpose & objective.  
-**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
-**Implementation:** Offer guidance on how to implement the standard effectively.  
-**Compliance:** Explain how compliance with the standard will be measured or assessed.  
-**Environment Considerations:** If the standard is different by environment, include those details.  
+## Implementation:
+- Place your test files in the appropriate directory and follow the naming convention.
+- Use the following template for structuring your tests:
 
-| Column 1 | Column 2 | Column 3 | Column 4 |
-| -------- | -------- | -------- | -------- |
+**Compliance:**
 
-### Test Structure and Examples  
-**Description:** Provide a concise description of the standards purpose & objective.  
-**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
-**Implementation:** Offer guidance on how to implement the standard effectively.  
-**Compliance:** Explain how compliance with the standard will be measured or assessed.  
-**Environment Considerations:** If the standard is different by environment, include those details.  
+- All new scripts must include corresponding `.Tests.ps1` files following this structure.
+- Tests must be tagged appropriately and cover all major code paths.
+- Code reviews and CI/CD pipelines will enforce compliance.
 
-| Column 1 | Column 2 | Column 3 | Column 4 |
-| -------- | -------- | -------- | -------- |
+**Environment Considerations:**
+- Local development may use interactive authentication; CI/CD must use non-interactive methods.
+- Ensure secrets and credentials are handled securely in all environments.
+**Sample Table Formatting:**
+| Test Type   | Tag         | Purpose                      | Example/Reference                 |
+| ----------- | ----------- | ---------------------------- | --------------------------------- |
+| Unit        | Unit        | Test individual functions    | `Describe ... -Tag "Unit"`        |
+| EndToEnd    | EndToEnd    | Full script execution        | `Describe ... -Tag "EndToEnd"`    |
+| Integration | Integration | Test integration points      | `Describe ... -Tag "Integration"` |
+| Quality     | Quality     | Code/documentation standards | `Describe ... -Tag "Quality"`     |
 
-### Functions  
-**Description:** Provide a concise description of the standards purpose & objective.  
-**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
-**Implementation:** Offer guidance on how to implement the standard effectively.  
-**Compliance:** Explain how compliance with the standard will be measured or assessed.  
-**Environment Considerations:** If the standard is different by environment, include those details.  
+ 
 
-| Column 1 | Column 2 | Column 3 | Column 4 |
-| -------- | -------- | -------- | -------- |
+---
 
-### Modules  
-**Description:** Provide a concise description of the standards purpose & objective.  
-**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
-**Implementation:** Offer guidance on how to implement the standard effectively.  
-**Compliance:** Explain how compliance with the standard will be measured or assessed.  
-**Environment Considerations:** If the standard is different by environment, include those details.  
+ 
 
-| Column 1 | Column 2 | Column 3 | Column 4 |
-| -------- | -------- | -------- | -------- |
+### Authentication
+**Description:** Explains the difference between interactive and non-interactive authentication methods in PowerShell testing, and why non-interactive authentication is required for automated tests in CI/CD environments.
 
-### Test Coverage  
-**Description:** Provide a concise description of the standards purpose & objective.  
-**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
-**Implementation:** Offer guidance on how to implement the standard effectively.  
-**Compliance:** Explain how compliance with the standard will be measured or assessed.  
-**Environment Considerations:** If the standard is different by environment, include those details.  
+**Guidelines:**
+- **Interactive Authentication:** Typically uses prompts or device login. Suitable for local development but not for automation. 
+- **Non-Interactive Authentication:** Uses service principals, managed identities, or stored credentials. Required for CI/CD and automated testing.
+- **Best Practice:** Always design scripts and tests to support non-interactive authentication for automation. Use secure methods to pass secrets (e.g., pipeline variables, Azure Key Vault).
+- **Reusable Modules:** Leverage shared authentication modules (e.g., `ConnectToServices.psm1`) to standardize and simplify authentication logic across scripts and tests.
+**Implementation:**
+- Refactor scripts to accept credentials or secrets as parameters (e.g., `-ServicePrincipalSecret`).
+- In test setup (`BeforeAll`), convert secrets to `SecureString` and pass to scripts under test.
+- Use pipeline variables or Azure Key Vault for secret management in CI/CD.
+- Example:
+    ```powershell
 
-| Column 1 | Column 2 | Column 3 | Column 4 |
-| -------- | -------- | -------- | -------- |
+    $SecurePW = $ServicePrincipalSecret | ConvertTo-SecureString -AsPlainText -Force
 
-### Adding Tests for New and Existing Scripts  
-**Description:** Provide a concise description of the standards purpose & objective.  
-**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
-**Implementation:** Offer guidance on how to implement the standard effectively.  
-**Compliance:** Explain how compliance with the standard will be measured or assessed.  
-**Environment Considerations:** If the standard is different by environment, include those details.  
+    . $RunScript -ServicePrincipalSecret $SecurePW -NonInteractive
 
-| Column 1 | Column 2 | Column 3 | Column 4 |
-| -------- | -------- | -------- | -------- |
+    ```
 
+**Compliance:**
+
+- All scripts and tests intended for automation must support non-interactive authentication.
+- Code reviews and pipeline runs will verify that no interactive prompts are present in automated tests.
+**Environment Considerations:**
+
+- Local development may use interactive authentication for convenience.
+- CI/CD and shared environments must use non-interactive authentication for security and reliability.
+ 
+**Authentication Table:**
+
+| Method          | Use Case          | Example/Reference                     | Notes                                   |
+| --------------- | ----------------- | ------------------------------------- | --------------------------------------- |
+| Interactive     | Local development | `Connect-AzAccount`                   | Not for automation                      |
+| Non-Interactive | CI/CD, automation | `Connect-AzAccount -ServicePrincipal` | Use in all automated test scenarios     |
+| Module-based    | Shared logic      | `ConnectToServices.psm1`              | Use for consistency and maintainability |
+ 
+
+### Pester Test Structure & Examples
+**Description:** Provides design decisions, rationale, and a template for structuring Pester tests, including setup, teardown, and best practices for maintainable and effective test suites.
+**Guidelines:**
+- Use `BeforeAll` for test setup and `AfterAll` for cleanup.
+- Organize tests using `Describe`, `Context`, and `It` blocks.
+- Use `Mock` to isolate units and simulate dependencies.
+- Ensure each function or module has at least one unit test for every expected result (throw, output, return value).
+- End-to-end tests should validate full script execution and resource cleanup.
+**Implementation:**
+- Follow the provided template for new test files.
+- Use tags to categorize tests and enable selective execution in CI/CD.
+Example:
+
+ 
+
+**Compliance:**
+- All new scripts must have corresponding tests following this structure.
+- Tests must cover all major code paths and expected results.
+- Code reviews and CI/CD will enforce compliance.
+**Environment Considerations:**
+- Ensure tests are environment-agnostic and do not rely on interactive input.
+- Use mocks and cleanup logic to avoid side effects in shared environments.
+**Sample Table Formatting:**
+
+| Block     | Purpose              | Example/Reference            | Notes                       |
+| --------- | -------------------- | ---------------------------- | --------------------------- |
+| BeforeAll | Setup                | Test variable initialization | Runs once before all tests  |
+| Describe  | Group related tests  | `Describe ...`               | Use tags for test selection |
+| It        | Individual test case | `It "Should ..." { ... }`    | One per expected result     |
+| AfterAll  | Cleanup              | Resource deletion            | Runs once after all tests   |
+
+**Functions**
+
+**Description:** Explains the importance of writing functions in PowerShell scripts, how to write them, and how to import them for testing.
+**Guidelines:**
+- Write reusable, single-responsibility functions for all logic.
+- Use `param` blocks to define inputs and support testability.
+- Export functions from modules for easy import and testing.
+- Avoid global variables; use local scope within functions.
+**Implementation:**
+- Refactor scripts into functions and modules where possible.
+- Import functions in test files using `Import-Module` or dot-sourcing.
+**Compliance:**
+- All new scripts should be function-based for testability.
+- Code reviews will check for function structure and test coverage.
+**Environment Considerations:**
+- Functions should not rely on environment-specific state.
+- Use parameters for all external dependencies.
+**Sample Table Formatting:**
+
+| Practice       | Rationale          | Example/Reference      | Notes                       |
+| -------------- | ------------------ | ---------------------- | --------------------------- |
+| Function-based | Testability, reuse | `function ... { ... }` | Use in all new scripts      |
+| Param blocks   | Input validation   | `param([string]$Name)` | Required for test injection |
+| Exported       | Import for testing | `Export-ModuleMember`  | For modules                 |
+
+### Modules
+**Description:** TODO: Describes the benefits of using modules for PowerShell code and testing, and how to structure and import them. The best practices for creating modules.
+
+**Guidelines:**
+- Organize related functions into modules (`.psm1` files).
+- Use modules to encapsulate logic and dependencies.
+- Export only public functions; keep helpers private.
+- Place module tests in corresponding `.Tests.ps1` files.
+
+**Implementation:**
+
+- Create a module for each major domain or service.
+- Use `Import-Module` in test files to load modules for testing.
+
+Example:
+
+**Compliance:**
+- All new code should be organized into modules where practical.
+- Tests must cover all exported functions.
+
+**Environment Considerations:**
+- Modules should be portable and not rely on environment-specific state.
+- Use parameters for configuration.
+
+**Sample Table Formatting:**
+
+| Practice      | Rationale            | Example/Reference     | Notes                          |
+| ------------- | -------------------- | --------------------- | ------------------------------ |
+| Module-based  | Encapsulation, reuse | `.psm1` files         | Use for all major code domains |
+| Exported only | Testability          | `Export-ModuleMember` | Only export public functions   |
+
+### Adequate Testing Coverage
+**Description:** Details the minimum requirements for test coverage, including unit and end-to-end tests, and how to ensure all code paths are tested.
+**Guidelines:**
+- Every function must have at least one unit test for each expected result (throw, output, return value).
+- End-to-end tests should validate complete script execution and resource cleanup.
+- Use mocks to isolate units and avoid side effects.
+**Implementation:**
+- Review all functions and ensure corresponding tests exist.
+- Use code coverage tools or manual review to identify gaps.
+
+- Example:
+    ```powershell
+    It "Should throw on invalid input" { { MyFunction -BadInput } | Should -Throw }
+
+    It "Should return expected value" { MyFunction -GoodInput | Should -Be 42 }
+
+  ```
+**Compliance:**
+- Code reviews and CI/CD pipelines will enforce coverage requirements.
+- Test results and coverage reports should be reviewed regularly.
+
+**Environment Considerations:**
+- Tests should be environment-agnostic and not rely on external state.
+- Use mocks and cleanup logic to avoid persistent changes.
+
+**Sample Table Formatting:**
+| Requirement            | Rationale           | Example/Reference              | Notes                   |
+| ---------------------- | ------------------- | ------------------------------ | ----------------------- |
+| Unit test per function | Ensures correctness | `It "Should ..." { ... }`      | One per expected result |
+| End-to-end test        | Validates workflow  | `Describe ... -Tag "EndToEnd"` | Covers full execution   |
+
+### Writing Tests For New Scripts and Existing Scripts
+**Description:** Explains the expectations for new scripts to follow these standards, and guidance for refactoring existing scripts.
+**Guidelines:**
+- All new scripts must adhere strictly to these standards.
+- Existing scripts in production should be refactored as time and resources allow, prioritizing high-impact or frequently changed scripts.
+- Developers have discretion for legacy code, but are encouraged to improve testability and structure over time.
+**Implementation:**
+- Use this standard as a checklist for all new development.
+- Plan refactoring of legacy scripts as part of technical debt management.
+**Compliance:**
+- New scripts will be reviewed for full compliance.
+- Existing scripts should show progress toward compliance over time.
+**Environment Considerations:**
+- Refactoring should not disrupt production operations.
+- Prioritize test coverage for critical or high-risk scripts.
+**Sample Table Formatting:**
+
+| Script Type | Standard Applied     | Example/Reference          | Notes                          |
+| ----------- | -------------------- | -------------------------- | ------------------------------ |
+| New         | Full compliance      | Follows all sections above | Required for all new scripts   |
+| Existing    | Refactor as feasible | Incremental improvements   | Prioritize high-impact scripts |
+
+ 
 ---
 
 ## PowerShell Coding Standards
