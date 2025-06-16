@@ -114,23 +114,26 @@ In summary, automated testing is a critical investment that ensures software qua
 ## Pester Testing Standards
 ### Pester Test Workflow and Syntax  
 **Description:** Defines the workflow, syntax, and best practices for writing and organizing Pester tests in PowerShell projects. Covers file placement, naming conventions, test discovery, execution, test file structure, setup/teardown, mocking, and the use of tags for test selection.
-**Guidelines:**
-- **File Placement & Naming:** Place all test files in a dedicated `Tests` directory or alongside the scripts/modules they test. Name test files with the `.Tests.ps1` suffix (e.g., `MyScript.Tests.ps1`).
-- **Discovery & Run:** Pester automatically discovers test files ending with `.Tests.ps1`. Use a consistent structure for test files to enable easy discovery and execution in CI/CD.
 
-- **Test File Structure:** Use `BeforeAll` and `AfterAll` blocks for setup and teardown. Organize tests using `Describe`, `Context`, and `It` blocks for clarity and maintainability.
-- **Mocking:** Use `Mock` to simulate dependencies and isolate units of code. Only mock external dependencies or side effects, not the code under test.
-- **Tags:** Use tags (e.g., `Unit`, `EndToEnd`, `Integration`, `Quality`) to categorize tests. Tags enable selective test execution in pipelines (see `azure-pipelines.yml` and `pester-tests.yml`).
+**Guidelines:**
+
+**File Placement & Naming:** Place all test files in a dedicated `Tests` directory or alongside the scripts/modules they test. Name test files with the `.Tests.ps1` suffix (e.g., `MyScript.Tests.ps1`).
+**Discovery & Run:** Pester automatically discovers test files ending with `.Tests.ps1`. Use a consistent structure for test files to enable easy discovery and execution in CI/CD.
+**Test File Structure:** Use `BeforeAll` and `AfterAll` blocks for setup and teardown. Organize tests using `Describe`, `Context`, and `It` blocks for clarity and maintainability.
+**Mocking:** Use `Mock` to simulate dependencies and isolate units of code. Only mock external dependencies or side effects, not the code under test.
+**Tags:** Use tags (e.g., `Unit`, `EndToEnd`, `Integration`, `Quality`) to categorize tests. Tags enable selective test execution in pipelines (see `azure-pipelines.yml` and `pester-tests.yml`).
+
 **Test Types:**
+
 - **Unit Tests:** Test individual functions or logic, using mocks as needed. Should cover all expected results (throws, outputs, returns).
 - **EndToEnd Tests:** Validate full script execution, including resource creation and teardown. Use tags like `EndToEnd` for these.
-
+  
 ## Implementation:
+
 - Place your test files in the appropriate directory and follow the naming convention.
 - Use the following template for structuring your tests:
-
 **Compliance:**
-
+  
 - All new scripts must include corresponding `.Tests.ps1` files following this structure.
 - Tests must be tagged appropriately and cover all major code paths.
 - Code reviews and CI/CD pipelines will enforce compliance.
