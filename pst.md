@@ -128,8 +128,7 @@ In summary, automated testing is a critical investment that ensures software qua
 - **Unit Tests:** Test individual functions or logic, using mocks as needed. Should cover all expected results (throws, outputs, returns).
 - **EndToEnd Tests:** Validate full script execution, including resource creation and teardown. Use tags like `EndToEnd` for these.
   
-## Implementation:
-
+** Implementation** :
 - Place your test files in the appropriate directory and follow the naming convention.
 - Use the following template for structuring your tests:
 **Compliance:**
@@ -141,6 +140,7 @@ In summary, automated testing is a critical investment that ensures software qua
 **Environment Considerations:**
 - Local development may use interactive authentication; CI/CD must use non-interactive methods.
 - Ensure secrets and credentials are handled securely in all environments.
+  
 **Sample Table Formatting:**
 | Test Type   | Tag         | Purpose                      | Example/Reference                 |
 | ----------- | ----------- | ---------------------------- | --------------------------------- |
@@ -196,26 +196,28 @@ In summary, automated testing is a critical investment that ensures software qua
 
 ### Pester Test Structure & Examples
 **Description:** Provides design decisions, rationale, and a template for structuring Pester tests, including setup, teardown, and best practices for maintainable and effective test suites.
+
 **Guidelines:**
 - Use `BeforeAll` for test setup and `AfterAll` for cleanup.
 - Organize tests using `Describe`, `Context`, and `It` blocks.
 - Use `Mock` to isolate units and simulate dependencies.
 - Ensure each function or module has at least one unit test for every expected result (throw, output, return value).
 - End-to-end tests should validate full script execution and resource cleanup.
+  
 **Implementation:**
 - Follow the provided template for new test files.
 - Use tags to categorize tests and enable selective execution in CI/CD.
 Example:
 
- 
-
 **Compliance:**
 - All new scripts must have corresponding tests following this structure.
 - Tests must cover all major code paths and expected results.
 - Code reviews and CI/CD will enforce compliance.
+  
 **Environment Considerations:**
 - Ensure tests are environment-agnostic and do not rely on interactive input.
 - Use mocks and cleanup logic to avoid side effects in shared environments.
+  
 **Sample Table Formatting:**
 
 | Block     | Purpose              | Example/Reference            | Notes                       |
@@ -225,23 +227,29 @@ Example:
 | It        | Individual test case | `It "Should ..." { ... }`    | One per expected result     |
 | AfterAll  | Cleanup              | Resource deletion            | Runs once after all tests   |
 
-**Functions**
+###Functions
 
 **Description:** Explains the importance of writing functions in PowerShell scripts, how to write them, and how to import them for testing.
+
 **Guidelines:**
+
 - Write reusable, single-responsibility functions for all logic.
 - Use `param` blocks to define inputs and support testability.
 - Export functions from modules for easy import and testing.
 - Avoid global variables; use local scope within functions.
+  
 **Implementation:**
 - Refactor scripts into functions and modules where possible.
 - Import functions in test files using `Import-Module` or dot-sourcing.
+  
 **Compliance:**
 - All new scripts should be function-based for testability.
 - Code reviews will check for function structure and test coverage.
+  
 **Environment Considerations:**
 - Functions should not rely on environment-specific state.
 - Use parameters for all external dependencies.
+  
 **Sample Table Formatting:**
 
 | Practice       | Rationale          | Example/Reference      | Notes                       |
