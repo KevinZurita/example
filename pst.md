@@ -110,7 +110,234 @@ In summary, automated testing is a critical investment that ensures software qua
 | -------- | -------- | -------- | -------- |
 
 ---
+## Pester Testing Standards
 
+### Pester Test Workflow and Syntax
+
+**Description:**
+Defines the workflow, syntax, and best practices for writing and organizing Pester tests in PowerShell projects. Covers file placement, naming conventions, test discovery, execution, test file structure, setup/teardown, mocking, and the use of tags for test selection.
+
+**Guidelines:**
+
+* **File Placement & Naming:**
+
+  * Place test files in a dedicated `Tests/` directory or adjacent to the scripts/modules under test.
+  * Test filenames must end in `.Tests.ps1` (e.g., `MyScript.Tests.ps1`).
+
+* **Test Discovery & Execution:**
+
+  * Pester automatically discovers `.Tests.ps1` files using `Invoke-Pester`.
+  * Run with specific tags or paths as needed:
+
+    ```powershell
+    Invoke-Pester -Path ./Tests -Tag 'Unit'
+    ```
+
+* **Test File Structure:**
+
+  * Use `BeforeAll` for global setup and `AfterAll` for cleanup.
+  * Use `Describe` to group related tests.
+  * Use `Context` to define specific conditions.
+  * Use `It` blocks for individual assertions.
+
+* **Mocking:**
+
+  * Use `Mock` to simulate external dependencies.
+  * Avoid mocking core commands unnecessarily.
+  * Validate mock usage with `Assert-MockCalled`.
+
+* **Tags:**
+
+  * Define test purpose with tags for filtering:
+
+    ```powershell
+    Describe 'Unit Test' -Tag 'Unit' { ... }
+    ```
+
+**Test Types:**
+
+| Test Type   | Tag         | Purpose                      | Example Reference                 |
+| ----------- | ----------- | ---------------------------- | --------------------------------- |
+| Unit        | Unit        | Test individual functions    | `Describe ... -Tag 'Unit'`        |
+| Integration | Integration | Validate integration points  | `Describe ... -Tag 'Integration'` |
+| EndToEnd    | EndToEnd    | Validate full execution flow | `Describe ... -Tag 'EndToEnd'`    |
+| Quality     | Quality     | Style, lint, documentation   | `Describe ... -Tag 'Quality'`     |
+
+**Implementation Template:**
+
+```powershell
+BeforeAll {
+    # Set up reusable variables or mocks
+}
+
+Describe 'MyFunction' -Tag 'Unit' {
+    Context 'When called with valid input' {
+        It 'should return expected output' {
+            MyFunction -Param 'value' | Should -Be 'expected'
+        }
+    }
+}
+
+AfterAll {
+    # Cleanup logic
+}
+```
+
+**Compliance:**
+
+* All scripts must include `.Tests.ps1` files.
+* Every exported function must have test coverage for normal, edge, and error conditions.
+* Tags must be appropriately applied to each `Describe` block.
+
+**Environment Considerations:**
+
+* Local dev may rely on interactive login.
+* CI/CD must use service principals or managed identity for non-interactive runs.
+
+---
+
+### Common Pester Assertions
+
+| Assertion               | Use Case                 | Example        | Notes                       |                                  |
+| ----------------------- | ------------------------ | -------------- | --------------------------- | -------------------------------- |
+| `Should -Be`            | Exact value match        | \`\$x          | Should -Be 5\`              | Simple value assertion           |
+| `Should -Match`         | Regex match              | \`\$str        | Should -Match 'error'\`     | Useful for log content           |
+| `Should -Contain`       | Collection contains item | \`\$arr        | Should -Contain 'admin'\`   | Array or hashtable keys          |
+| `Should -Throw`         | Error expected           | \`{ Do-Thing } | Should -Throw\`             | Always wrap in script block      |
+| `Should -BeExactly`     | Case-sensitive match     | \`\$name       | Should -BeExactly 'Admin'\` | Rarely needed                    |
+| `Should -BeGreaterThan` | Numeric comparison       | \`10           | Should -BeGreaterThan 5\`   | Intuitive for counters or limits |
+
+---
+
+### Authentication
+
+**Description:**
+Outlines how to implement and test authentication logic that works both interactively (local dev) and non-interactively (CI/CD).
+
+**Guidelines:**
+
+* Use interactive methods (e.g., `Connect-AzAccount`) only for local dev.
+* Design all automation scripts to use service principals, managed identity, or credential parameters.
+* Store credentials in pipeline variables or a secure vault.
+* Refactor scripts to support `-ServicePrincipalSecret`, `-NonInteractive`, or similar parameters.
+
+**Implementation:**
+
+```powershell
+$SecurePW = $env:AZURE_SECRET | ConvertTo-SecureString -AsPlainText -Force
+Connect-AzAccount -ServicePrincipal -Tenant $Tenant -Credential (New-Object PSCredential($AppId, $SecurePW))
+```
+
+**Authentication Table:**
+
+| Method          | Use Case          | Example                               | Notes                               |
+| --------------- | ----------------- | ------------------------------------- | ----------------------------------- |
+| Interactive     | Local development | `Connect-AzAccount`                   | Avoid in automation scripts         |
+| Non-Interactive | CI/CD             | `Connect-AzAccount -ServicePrincipal` | Use in pipeline and test setups     |
+| Reusable Module | Standardization   | `ConnectToServices.psm1`              | Centralizes logic and reduces drift |
+
+**Compliance:**
+
+* All automated tests must use non-interactive authentication.
+* CI/CD logs must not contain secrets or prompts.
+
+---
+
+### Pester Test Structure Examples
+
+| Block       | Purpose                  | Example                             | Notes                               |
+| ----------- | ------------------------ | ----------------------------------- | ----------------------------------- |
+| `BeforeAll` | Global setup             | Variable init, authentication setup | Runs once per `Describe` block      |
+| `Describe`  | Group related test cases | `Describe 'Get-Report' {}`          | Apply tags here                     |
+| `Context`   | Sub-scenario group       | `Context 'With null input' {}`      | Optional for complex tests          |
+| `It`        | Single test expectation  | `It 'Should return X' { ... }`      | Must contain at least one assertion |
+| `AfterAll`  | Global teardown          | Clean up resources or temp files    | Runs once after all tests           |
+
+---
+
+### Functions in Tests
+
+**Best Practices:**
+
+* Functions should be written with testability in mind.
+* Each function should be imported and tested in isolation.
+* Avoid reliance on global or script scope variables.
+
+**Implementation Tips:**
+
+* Use `param()` to inject dependencies.
+* Return values instead of writing to output stream.
+* Import functions using dot-sourcing or `Import-Module`:
+
+```powershell
+. "$PSScriptRoot\..\MyModule.psm1"
+```
+
+**Function Test Table:**
+
+| Practice        | Rationale             | Example          | Notes                           |
+| --------------- | --------------------- | ---------------- | ------------------------------- |
+| `param()` usage | Dependency injection  | `param($key)`    | Supports mock inputs            |
+| Return values   | Test-friendly results | `return $result` | Avoid `Write-Host`              |
+| Imports         | Load target function  | `Import-Module`  | Use module versioning if needed |
+
+---
+
+### Writing Tests for New and Existing Scripts
+
+**Standards:**
+
+* All new scripts must come with `.Tests.ps1` files.
+* Existing scripts should be refactored over time to include test coverage.
+* Focus test additions on high-risk or frequently modified scripts.
+
+**Compliance Expectations:**
+
+| Script Type | Test Standard        | Notes                          |
+| ----------- | -------------------- | ------------------------------ |
+| New         | Full compliance      | Must follow test standards     |
+| Existing    | Incremental adoption | Prioritize based on usage/risk |
+
+---
+
+### Coverage Requirements
+
+**Description:**
+Defines expectations for coverage, including what counts as adequate coverage for PowerShell scripts.
+
+**Requirements:**
+
+* At least one test for each:
+
+  * Expected success case (valid return value)
+  * Expected failure or `throw`
+  * Expected stream output (e.g., verbose, error)
+
+**Examples:**
+
+```powershell
+It 'Should throw on bad input' {
+    { Do-Thing -BadParam } | Should -Throw
+}
+
+It 'Should return value on success' {
+    Do-Thing -GoodParam | Should -Be 42
+}
+```
+
+**Coverage Table:**
+
+| Requirement       | Rationale                | Test Type   | Example Reference               |
+| ----------------- | ------------------------ | ----------- | ------------------------------- |
+| Throws on error   | Fail-fast on invalid use | Unit        | `Should -Throw`                 |
+| Expected output   | Returns correct result   | Unit        | `Should -Be`, `Should -Contain` |
+| Stream validation | Validates logging format | Integration | `Should -Match 'VERBOSE:'`      |
+
+---
+
+For additional syntax, see the official [Pester documentation](https://pester.dev).
+
+---
 ## Pester Testing Standards
 ### Pester Test Workflow and Syntax  
 **Description:** Defines the workflow, syntax, and best practices for writing and organizing Pester tests in PowerShell projects. Covers file placement, naming conventions, test discovery, execution, test file structure, setup/teardown, mocking, and the use of tags for test selection.
@@ -342,7 +569,93 @@ Example:
 | New         | Full compliance      | Follows all sections above | Required for all new scripts   |
 | Existing    | Refactor as feasible | Incremental improvements   | Prioritize high-impact scripts |
 
- 
+ ## Mocking and Integration in Pester
+
+### Mocking Strategy
+
+**Purpose:** Enable reliable, isolated testing of PowerShell functions and modules by substituting external dependencies.
+
+**Best Practices:**
+
+* Use `Mock` to replace external functions or commands during test execution.
+* Always test the behavior, not the implementation details.
+* Limit the scope of mocks using `-ModuleName` or script scope.
+* Avoid mocking internal functions unnecessarily.
+
+**✅ Do:**
+
+```powershell
+Describe 'Get-DataFromAPI' {
+    Mock Invoke-RestMethod { return @{ Name = 'Test' } }
+
+    It 'should return a Name property' {
+        (Get-DataFromAPI).Name | Should -Be 'Test'
+    }
+}
+```
+
+**🚫 Avoid:**
+
+```powershell
+Mock Write-Output { "forced" }  # Unnecessary mocking of core cmdlets
+```
+
+**Implementation Tips:**
+
+* Mock `Start-Job`, `Invoke-RestMethod`, `Get-ChildItem`, or any filesystem/network interaction.
+* Validate mocks were called using `Assert-MockCalled`.
+
+---
+
+### Integration with CI/CD Pipelines
+
+**Goal:** Ensure tests run consistently in build pipelines and failures are surfaced early.
+
+**Implementation Steps:**
+
+* Install Pester in the agent or container.
+* Run tests using:
+
+```powershell
+Invoke-Pester -Path "./Tests" -Output Detailed -CI
+```
+
+* Export results for reporting:
+
+```powershell
+Invoke-Pester -Path "./Tests" -OutputFormat NUnitXml -OutputFile "TestResults.xml"
+```
+
+* In Azure DevOps, publish results with:
+
+```yaml
+- task: PublishTestResults@2
+  inputs:
+    testResultsFiles: '**/TestResults.xml'
+    testResultsFormat: 'NUnit'
+```
+
+---
+
+### Recommended Folder Layout
+
+```text
+ProjectRoot/
+│
+├── Modules/
+│   ├── MyModule/
+│   │   ├── Public/
+│   │   ├── Private/
+│   │   ├── MyModule.psd1
+│   │   └── MyModule.psm1
+│
+├── Tests/
+│   ├── MyModule.Tests.ps1
+│   └── MockData/
+│
+└── azure-pipelines.yml
+```
+
 ---
 
 ## PowerShell Coding Standards
