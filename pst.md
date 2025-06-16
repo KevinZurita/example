@@ -48,12 +48,32 @@ The framework consists of:
 Together, these components provide a robust, scalable, and maintainable approach to automated testing, supporting best practices throughout the PowerShell development lifecycle at NM. The scope of this document is to detail the Standards for PowerShell automated testing using Pester. Automated testing is essential for modern software development, providing early bug detection, improved code quality, faster feedback, and increased developer productivity.
 
 ### Definitions
+Include key terms, acronyms, and abbreviations used in the document. Example:
+
+| Term   | Definition                       |
+| ------ | -------------------------------- |
+| Term 1 | This is my definition for Term 1 |
+| Term 2 | This is my definition for Term 2 |
 
 ### Scope
 
+This standard applies to all PowerShell scripts, modules, and automation maintained or developed by NM Cloud Operations, especially those integrated into Azure DevOps pipelines. It covers all stages of development with this testing framework, CI/CD execution, error handling, test structure, and code organization.
+
 ### Value
 
+Automated tests are essential for modern software development, providing significant value throughout the development lifecycle:
+- **Early Bug Detection & Prevention:** Automated unit and regression tests catch issues early, reducing the cost and effort of fixes and preventing regressions as code evolves.
+- **Improved Code Quality & Maintainability:** Test-driven development (TDD) and comprehensive test suites encourage modular, well-structured, and maintainable code, while serving as living documentation for intended behavior.
+- **Faster Feedback & Debugging:** Automated tests in CI/CD pipelines provide rapid feedback on code changes, enabling quick identification and resolution of issues, and streamlining debugging.
+- **Developer Productivity & Safe Refactoring:** Reliable tests empower developers to make changes and refactor code with confidence, knowing that defects will be caught automatically.
+- **Efficiency, Scalability & Cost Savings:** Automation reduces manual testing effort, accelerates delivery, scales with application complexity, and lowers long-term costs by catching issues early.
+- **Collaboration & Continuous Improvement:** Shared test suites foster better communication between teams, and test metrics drive ongoing process improvement and resource optimization.
+
+In summary, automated testing is a critical investment that ensures software quality, reliability, and agility at scale.
+
+
 ### Stakeholders
+- NM Cloud Operations Team
 
 ---
 
