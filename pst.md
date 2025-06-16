@@ -347,40 +347,221 @@ Example:
 
 ## PowerShell Coding Standards
 
-### PowerShell Coding Standards for Automated Testing  
-**Description:** Provide a concise description of the standards purpose & objective.  
-**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
-**Implementation:** Offer guidance on how to implement the standard effectively.  
-**Compliance:** Explain how compliance with the standard will be measured or assessed.  
-**Environment Considerations:** If the standard is different by environment, include those details.  
+### PowerShell Coding Standards for Automated Testing
 
-| Column 1 | Column 2 | Column 3 | Column 4 |
-| -------- | -------- | -------- | -------- |
+**Description:**
+This standard defines the structure, practices, and expectations for writing PowerShell code that supports automated testing using Pester. Its objective is to create consistent, maintainable, and testable PowerShell code across all scripts and modules used in CI/CD pipelines and production workloads.
 
-### Error Handling and Output  
-**Description:** Provide a concise description of the standards purpose & objective.  
-**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
-**Implementation:** Offer guidance on how to implement the standard effectively.  
-**Compliance:** Explain how compliance with the standard will be measured or assessed.  
-**Environment Considerations:** If the standard is different by environment, include those details.  
+**Guidelines:**
 
-| Column 1 | Column 2 | Column 3 | Column 4 |
-| -------- | -------- | -------- | -------- |
+* **Function-First Design:** Encapsulate all logic in advanced functions with `CmdletBinding`. Avoid inline script logic.
 
-### Advanced PowerShell Language Features  
-**Description:** Provide a concise description of the standards purpose & objective.  
-**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
-**Implementation:** Offer guidance on how to implement the standard effectively.  
-**Compliance:** Explain how compliance with the standard will be measured or assessed.  
-**Environment Considerations:** If the standard is different by environment, include those details.  
+  **✅ Do:**
 
-| Column 1 | Column 2 | Column 3 | Column 4 |
-| -------- | -------- | -------- | -------- |
+  ```powershell
+  function Get-UserData {
+      [CmdletBinding()]
+      param([string]$UserName)
+      return "Data for $UserName"
+  }
+  ```
+
+  **🚫 Avoid:**
+
+  ```powershell
+  $UserName = 'Kevin'
+  Write-Output "Data for $UserName"
+  ```
+
+* **Single Responsibility Principle:** Each function should perform one specific task. Split logic into units.
+
+* **Comment-Based Help:** All functions must include help blocks with synopsis, description, and examples.
+
+* **Avoid Global State:** Avoid `$global:` or shared variables.
+
+* **Naming Conventions:** Use PascalCase for functions, camelCase for local variables.
+
+* **Approved Verbs:** Stick to verbs from `Get-Verb`.
+
+* **Validation Attributes:** Use parameter validation where applicable.
+
+* **Modular Structure:** Prefer modules over monolithic scripts.
+
+**Implementation:**
+Adopt a module-based structure with `Public/`, `Private/`, and `Tests/` folders. Use PSScriptAnalyzer:
+
+```powershell
+Invoke-ScriptAnalyzer -Path ./Scripts -Recurse -Settings PSGallery
+```
+
+**Compliance:**
+
+* PSScriptAnalyzer must pass.
+* All exported functions must have unit tests.
+* Violations surfaced in pull requests.
+
+**Environment Considerations:**
+
+* Relaxed in local/dev, stricter in CI/prod.
+
+| Topic           | Standard Requirement | Example/Tool            | Notes                      |
+| --------------- | -------------------- | ----------------------- | -------------------------- |
+| Naming          | Verb-Noun            | `Get-Report`            | Use `Get-Verb`             |
+| Help Comments   | Required             | `<# .SYNOPSIS ... #>`   | Use `New-HelpComment` tool |
+| Script Analyzer | Mandatory            | `Invoke-ScriptAnalyzer` | CI integrated              |
+| Structure       | Module-Based         | `Public/Private/Tests`  | Scaffold with `Plaster`    |
+
+---
+
+### Error Handling and Output
+
+**Description:**
+Defines how errors and output streams must be handled in PowerShell code to ensure testability, consistency, and clarity in diagnostics.
+
+**Guidelines:**
+
+* Use `throw` to indicate logic errors you want your tests to assert.
+* Use `Write-Error` for runtime errors that might allow continued execution.
+* Use `Write-Verbose` for developer insights.
+* Use `Write-Warning` to alert non-fatal conditions.
+* Avoid `Write-Host` as it bypasses streams.
+* Use `Write-Output` when the function is returning data to another command or for Pester assertions.
+* Use `Write-Information` for user-facing runtime logs that can be captured explicitly.
+
+**✅ Do:**
+
+```powershell
+function Connect-Service {
+    [CmdletBinding()]
+    param()
+    try {
+        Do-Connect -ErrorAction Stop
+    } catch {
+        throw "Connection failed: $_"
+    }
+}
+```
+
+**🚫 Avoid:**
+
+```powershell
+function Connect-Service {
+    Write-Host "Attempting connection..."
+    Do-Connect
+    if (!$?) { Write-Host "Failed" }
+}
+```
+
+**Implementation:**
+Enable `$ErrorActionPreference = 'Stop'`. Capture streams in tests:
+
+```powershell
+{ Get-Thing -BadParam } | Should -Throw
+```
+
+Stream handling:
+
+```powershell
+Write-Output "output"         # Passes to pipeline
+Write-Verbose "debug"         # Use for dev visibility
+Write-Information "log"       # Capturable in CI logs
+Write-Warning "warning"       # Alerts user, non-fatal
+Write-Error "failure"         # Error stream, avoid if `throw` is better
+```
+
+**Compliance:**
+
+* All outputs must be testable.
+* Stream misuse is flagged in reviews.
+* Logs should never leak secrets.
+
+**Environment Considerations:**
+
+* Verbose and information logs may be disabled in production unless explicitly enabled.
+
+| Stream      | Use Case                   | ✅ Use Case Example  | 🚫 Anti-Pattern                |
+| ----------- | -------------------------- | ------------------- | ------------------------------ |
+| Output      | Primary return values      | `return $result`    | `Write-Host $result`           |
+| Error       | Script-breaking conditions | `throw "Error"`     | `Write-Error` for logic errors |
+| Warning     | Alert but continue         | `Write-Warning`     | Using error instead            |
+| Verbose     | Developer diagnostics      | `Write-Verbose`     | Hardcoded log messages         |
+| Information | Operational logs           | `Write-Information` | Overusing `Write-Output`       |
+
+---
+
+### Advanced PowerShell Language Features
+
+**Description:**
+Guidance on when and how to apply advanced features like classes, script blocks, dynamic params, and streaming logic to make code more testable and modular.
+
+**Guidelines:**
+
+* **Classes:** Use for internal stateful modeling (e.g., job objects), but avoid unless necessary.
+* **Script Blocks:** Use for deferred logic or `Invoke-Command`. Avoid overly complex inline blocks.
+* **Dynamic Parameters:** Use when parameter availability depends on external context. Avoid when static params suffice.
+* **Pipeline Support:** Ensure you handle piped input correctly using `process {}` blocks.
+* **Closures:** Script blocks can be passed to functions for mockable behavior.
+
+**✅ Do:**
+
+```powershell
+function Get-Name {
+    [CmdletBinding()]
+    param([string[]]$InputObject)
+    process {
+        foreach ($name in $InputObject) {
+            [PSCustomObject]@{ Name = $name }
+        }
+    }
+}
+```
+
+**🚫 Avoid:**
+
+```powershell
+function Get-Name {
+    param($InputObject)
+    foreach ($name in $InputObject) {
+        Write-Output $name
+    }
+}
+```
+
+**Implementation:**
+
+* Use `Export-ModuleMember` for module scope control.
+* Test class behavior via method calls and assert internal state.
+* Test pipeline functions with arrays and piped input:
+
+  ```powershell
+  @("one","two") | Get-Name | Should -HaveCount 2
+  ```
+
+**Compliance:**
+
+* Any dynamic parameter or class must include justification and tests.
+* Streaming functions must work with single and multiple items.
+
+**Environment Considerations:**
+
+* Classes are only supported in PowerShell 5+ and PowerShell Core.
+* Pipeline logic must work cross-platform and in non-interactive shells.
+
+| Feature       | Use Case             | ✅ Preferred              | 🚫 Avoid                       |
+| ------------- | -------------------- | ------------------------ | ------------------------------ |
+| Class         | Model reusable data  | `class Task {}`          | Overengineering                |
+| Script Block  | Reusable logic       | `{ param($x) $x + 1 }`   | Complex inline logic           |
+| Pipeline      | Stream data          | `process {}`             | Collecting all then outputting |
+| Dynamic Param | Conditional behavior | `$PSCmdlet.MyInvocation` | Confusing interfaces           |
 
 ---
 
 ## References
-- [Pester Documentation](https://pester.dev)
-- [PowerShell Best Practices](https://docs.microsoft.com/en-us/powershell/scripting)
-- [Azure DevOps Pipelines](https://learn.microsoft.com/en-us/azure/devops/pipelines/)
-- [PowerShell ScriptAnalyzer](https://github.com/PowerShell/PSScriptAnalyzer)
+
+* [Pester Documentation](https://pester.dev)
+* [PowerShell Script Analyzer](https://github.com/PowerShell/PSScriptAnalyzer)
+* [Approved Verbs for PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-cmdlets)
+* [PowerShell Best Practices and Style Guide](https://poshcode.gitbook.io/powershell-practice-and-style/)
+* [Test-Driven Development in PowerShell](https://leanpub.com/pesterbook)
+* [PowerShell Classes](https://learn.microsoft.com/en-us/powershell/scripting/developer/help/powershell-classes)
+
