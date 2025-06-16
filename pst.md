@@ -31,6 +31,21 @@
 ## Overview
 
 ### Introduction
+This document provides standardized guidance for configuring and setting up automated testing frameworks for PowerShell in NM Cloud Operations. It covers prerequisites, installation, configuration, CI/CD integration, best practices, and troubleshooting, with a focus on Pester and Azure DevOps compatibility.
+
+To achieve these goals, NM Cloud Operations has developed an Automated Testing Framework with the following objectives:
+- Ensure early detection of bugs and regressions through comprehensive automated testing.
+- Promote consistent, high-quality PowerShell code by enforcing documentation and code quality standards.
+- Streamline CI/CD processes by providing reusable pipeline templates and automation scripts.
+- Increase developer confidence and productivity by enabling rapid feedback and safe refactoring.
+  
+The framework consists of:
+- A reusable YAML pipeline template for standardized CI/CD test execution.
+- A centralized `TestExecutionScript.ps1` for orchestrating and running all Pester tests.
+- Dedicated scripts for code quality and documentation validation, ensuring every script meets organizational standards.
+- A dedicated Azure Agent Pool that provides consistent compute resources for pipeline execution.
+
+Together, these components provide a robust, scalable, and maintainable approach to automated testing, supporting best practices throughout the PowerShell development lifecycle at NM. The scope of this document is to detail the Standards for PowerShell automated testing using Pester. Automated testing is essential for modern software development, providing early bug detection, improved code quality, faster feedback, and increased developer productivity.
 
 ### Definitions
 
