@@ -79,40 +79,147 @@ In summary, automated testing is a critical investment that ensures software qua
 
 ## Testing Framework Components & Configuration
 
-### Testing Framework Components
+### Testing Framework Components  
+**Description:** Provide a concise description of the standards purpose & objective.  
+**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
+**Implementation:** Offer guidance on how to implement the standard effectively.  
+**Compliance:** Explain how compliance with the standard will be measured or assessed.  
+**Environment Considerations:** If the standard is different by environment, include those details.  
 
-### Framework Configuration
+| Column 1 | Column 2 | Column 3 | Column 4 |
+| -------- | -------- | -------- | -------- |
 
-### Testing Modalities
+### Framework Configuration  
+**Description:** Provide a concise description of the standards purpose & objective.  
+**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
+**Implementation:** Offer guidance on how to implement the standard effectively.  
+**Compliance:** Explain how compliance with the standard will be measured or assessed.  
+**Environment Considerations:** If the standard is different by environment, include those details.  
+
+| Column 1 | Column 2 | Column 3 | Column 4 |
+| -------- | -------- | -------- | -------- |
+
+### Testing Modalities  
+**Description:** Provide a concise description of the standards purpose & objective.  
+**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
+**Implementation:** Offer guidance on how to implement the standard effectively.  
+**Compliance:** Explain how compliance with the standard will be measured or assessed.  
+**Environment Considerations:** If the standard is different by environment, include those details.  
+
+| Column 1 | Column 2 | Column 3 | Column 4 |
+| -------- | -------- | -------- | -------- |
 
 ---
 
 ## Pester Testing Standards
+### Pester Test Workflow and Syntax  
+**Description:** Provide a concise description of the standards purpose & objective.  
+**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
+**Implementation:** Offer guidance on how to implement the standard effectively.  
+**Compliance:** Explain how compliance with the standard will be measured or assessed.  
+**Environment Considerations:** If the standard is different by environment, include those details.  
 
-### Pester Test Workflow and Syntax
+| Column 1 | Column 2 | Column 3 | Column 4 |
+| -------- | -------- | -------- | -------- |
 
-### Authentication
+### Authentication  
+**Description:** Provide a concise description of the standards purpose & objective.  
+**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
+**Implementation:** Offer guidance on how to implement the standard effectively.  
+**Compliance:** Explain how compliance with the standard will be measured or assessed.  
+**Environment Considerations:** If the standard is different by environment, include those details.  
 
-### Test Structure and Examples
+| Column 1 | Column 2 | Column 3 | Column 4 |
+| -------- | -------- | -------- | -------- |
 
-### Functions
+### Test Structure and Examples  
+**Description:** Provide a concise description of the standards purpose & objective.  
+**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
+**Implementation:** Offer guidance on how to implement the standard effectively.  
+**Compliance:** Explain how compliance with the standard will be measured or assessed.  
+**Environment Considerations:** If the standard is different by environment, include those details.  
 
-### Modules
+| Column 1 | Column 2 | Column 3 | Column 4 |
+| -------- | -------- | -------- | -------- |
 
-### Test Coverage
+### Functions  
+**Description:** Provide a concise description of the standards purpose & objective.  
+**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
+**Implementation:** Offer guidance on how to implement the standard effectively.  
+**Compliance:** Explain how compliance with the standard will be measured or assessed.  
+**Environment Considerations:** If the standard is different by environment, include those details.  
 
-### Adding Tests for New and Existing Scripts
+| Column 1 | Column 2 | Column 3 | Column 4 |
+| -------- | -------- | -------- | -------- |
+
+### Modules  
+**Description:** Provide a concise description of the standards purpose & objective.  
+**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
+**Implementation:** Offer guidance on how to implement the standard effectively.  
+**Compliance:** Explain how compliance with the standard will be measured or assessed.  
+**Environment Considerations:** If the standard is different by environment, include those details.  
+
+| Column 1 | Column 2 | Column 3 | Column 4 |
+| -------- | -------- | -------- | -------- |
+
+### Test Coverage  
+**Description:** Provide a concise description of the standards purpose & objective.  
+**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
+**Implementation:** Offer guidance on how to implement the standard effectively.  
+**Compliance:** Explain how compliance with the standard will be measured or assessed.  
+**Environment Considerations:** If the standard is different by environment, include those details.  
+
+| Column 1 | Column 2 | Column 3 | Column 4 |
+| -------- | -------- | -------- | -------- |
+
+### Adding Tests for New and Existing Scripts  
+**Description:** Provide a concise description of the standards purpose & objective.  
+**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
+**Implementation:** Offer guidance on how to implement the standard effectively.  
+**Compliance:** Explain how compliance with the standard will be measured or assessed.  
+**Environment Considerations:** If the standard is different by environment, include those details.  
+
+| Column 1 | Column 2 | Column 3 | Column 4 |
+| -------- | -------- | -------- | -------- |
 
 ---
 
 ## PowerShell Coding Standards
 
-### PowerShell Coding Standards for Automated Testing
+### PowerShell Coding Standards for Automated Testing  
+**Description:** Provide a concise description of the standards purpose & objective.  
+**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
+**Implementation:** Offer guidance on how to implement the standard effectively.  
+**Compliance:** Explain how compliance with the standard will be measured or assessed.  
+**Environment Considerations:** If the standard is different by environment, include those details.  
 
-### Error Handling and Output
+| Column 1 | Column 2 | Column 3 | Column 4 |
+| -------- | -------- | -------- | -------- |
 
-### Advanced PowerShell Language Features
+### Error Handling and Output  
+**Description:** Provide a concise description of the standards purpose & objective.  
+**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
+**Implementation:** Offer guidance on how to implement the standard effectively.  
+**Compliance:** Explain how compliance with the standard will be measured or assessed.  
+**Environment Considerations:** If the standard is different by environment, include those details.  
+
+| Column 1 | Column 2 | Column 3 | Column 4 |
+| -------- | -------- | -------- | -------- |
+
+### Advanced PowerShell Language Features  
+**Description:** Provide a concise description of the standards purpose & objective.  
+**Guidelines:** Outline the specific guidelines, best practices, or requirements related to the standards.  
+**Implementation:** Offer guidance on how to implement the standard effectively.  
+**Compliance:** Explain how compliance with the standard will be measured or assessed.  
+**Environment Considerations:** If the standard is different by environment, include those details.  
+
+| Column 1 | Column 2 | Column 3 | Column 4 |
+| -------- | -------- | -------- | -------- |
 
 ---
 
 ## References
+- [Pester Documentation](https://pester.dev)
+- [PowerShell Best Practices](https://docs.microsoft.com/en-us/powershell/scripting)
+- [Azure DevOps Pipelines](https://learn.microsoft.com/en-us/azure/devops/pipelines/)
+- [PowerShell ScriptAnalyzer](https://github.com/PowerShell/PSScriptAnalyzer)
